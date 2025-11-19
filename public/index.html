@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endgame Pro</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessground@9.0.0/assets/chessground.base.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessground@9.0.0/assets/chessground.brown.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #050505; --glass: rgba(255, 255, 255, 0.04); --glass-border: rgba(255, 255, 255, 0.1);
+    --accent: #00f2ff; --accent-glow: rgba(0, 242, 255, 0.2); --danger: #ff0055;
+    --text-main: #ffffff; --text-muted: #888;
+    --col-brilliant: #26c2a3; --col-good: #96bc4b; --col-mistake: #ffa45e; --col-blunder: #fa5c5c;
+  }
+  * { box-sizing: border-box; }
+  body { background: radial-gradient(circle at top center, #121212 0%, #000000 80%); color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden; }
+  
+  .app-layout { display: grid; grid-template-columns: 40px auto 400px; gap: 30px; padding: 40px; max-width: 1600px; width: 100%; animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  
+  .eval-track { width: 30px; height: 640px; background: #202020; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid #333; }
+  .eval-fill { width: 100%; background: #fff; position: absolute; bottom: 0; height: 50%; transition: height 0.5s ease-out; }
+  .eval-text { position: absolute; width: 100%; text-align: center; font-size: 10px; font-weight: bold; z-index: 5; font-family: 'JetBrains Mono', monospace; pointer-events: none; }
+  .eval-text.top { top: 5px; color: #fff; }
+  .eval-text.bot { bottom: 5px; color: #000; }
+
+  #board { width: 640px; height: 640px; border-radius: 8px; box-shadow: 0 0 60px rgba(0,0,0,0.5); border: 1px solid #333; }
+  body.mode-bot #board { box-shadow: 0 0 60px rgba(255, 0, 85, 0.15); border-color: var(--danger); }
+  body.mode-analysis #board { box-shadow: 0 0 60px rgba(0, 242, 255, 0.1); border-color: var(--accent); }
+
+  .hud { display: flex; flex-direction: column; gap: 20px; height: 640px; }
+  .panel { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; }
+  
+  .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+  .status-badge { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 100px; color: var(--accent); }
+  
+  .moves-wrap { flex-grow: 1; background: rgba(0,0,0,0.2); border-radius: 10px; overflow-y: auto; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); scrollbar-width: thin; }
+  .move-row { display: grid; grid-template-columns: 30px 1fr 50px 30px; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: #aaa; transition: 0.1s; }
+  .move-row:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  .eval-val { text-align: right; font-size: 11px; opacity: 0.7; }
+  .classification { text-align: center; font-weight: bold; }
+  .cl-brilliant { color: var(--col-brilliant); } .cl-mistake { color: var(--col-mistake); } .cl-blunder { color: var(--col-blunder); }
+
+  .main-btn { background: linear-gradient(135deg, #222, #333); border: 1px solid #444; color: #fff; padding: 14px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+  .main-btn:hover { border-color: #fff; transform: translateY(-1px); }
+  .main-btn.primary { background: var(--accent); color: #000; border: none; font-weight: 800; }
+  
+  .scenario-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+  .tab { flex: 1; background: transparent; border: 1px solid var(--glass-border); color: #666; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; }
+  .tab:hover { color: #ccc; }
+  .tab.active { background: rgba(0, 242, 255, 0.1); color: var(--accent); border-color: var(--accent); }
+
+  .icon-btn { background: transparent; border: 1px solid var(--glass-border); color: #888; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+  .icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+  .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+  .modal { background: #111; border: 1px solid #333; padding: 30px; border-radius: 16px; width: 500px; max-width: 90%; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+  .input-dark { width: 100%; background: #050505; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin: 10px 0; font-family: 'JetBrains Mono'; font-size: 13px; }
+  .hidden { display: none !important; }
+  @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  
+  /* Typing Effect for AI */
+  .ai-typing { font-family: 'Inter'; font-size: 13px; color: #e0e0e0; line-height: 1.5; min-height: 40px; white-space: pre-wrap; }
+  .ai-typing::after { content: '▋'; animation: blink 1s infinite; color: var(--accent); }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .cg-wrap piece.white { filter: drop-shadow(0 0 1px black); } .cg-wrap piece.black { filter: drop-shadow(0 0 5px var(--accent)); }
+  piece { background-size: contain; background-repeat: no-repeat; background-position: center; }
+  piece.white.pawn { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/wP.svg'); }
+  piece.white.bishop { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/wB.svg'); }
+  piece.white.knight { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/wN.svg'); }
+  piece.white.rook { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/wR.svg'); }
+  piece.white.queen { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/wQ.svg'); }
+  piece.white.king { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/wK.svg'); }
+  piece.black.pawn { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/bP.svg'); }
+  piece.black.bishop { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/bB.svg'); }
+  piece.black.knight { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/bN.svg'); }
+  piece.black.rook { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/bR.svg'); }
+  piece.black.queen { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/bQ.svg'); }
+  piece.black.king { background-image: url('https://raw.githubusercontent.com/lichess-org/lila/master/public/piece/cburnett/bK.svg'); }
+  
+  @media(max-width:1200px) { .app-layout { grid-template-columns: 1fr; justify-items: center; } .eval-track { display: none; } #board { width: 90vw; height: 90vw; } .hud { width: 90vw; } }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <div class="eval-track">
+    <div class="eval-text top" id="eval-top"></div>
+    <div class="eval-fill" id="eval-fill"></div>
+    <div class="eval-text bot" id="eval-bot">0.0</div>
+  </div>
+
+  <div class="board-container">
+    <div id="board"></div>
+  </div>
+
+  <div class="hud">
+    <div class="panel" style="padding-bottom: 15px;">
+      <div class="header-row">
+        <div class="status-badge" id="status-badge">Trainer</div>
+        <div style="display:flex; gap:5px;">
+            <!-- COPY BUTTON -->
+            <button class="icon-btn" id="btn-copy-pgn" title="Copy PGN">📋</button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="main-btn" id="btn-import" style="flex: 1;">📥 Import Game</button>
+        <button class="main-btn" id="btn-bot-mode" style="flex: 1; border-color: var(--danger); color: var(--danger);">⚔️ Play Bot</button>
+      </div>
+      <div id="bot-settings" class="hidden" style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:5px;">
+           <span>Bot Level</span> <span id="bot-elo-disp" style="color:var(--danger); font-weight:bold;">1200</span>
+        </div>
+        <input type="range" id="bot-elo" min="400" max="2800" value="1200" step="100" style="width:100%; accent-color: var(--danger);">
+      </div>
+    </div>
+
+    <div class="panel" style="flex-grow: 1;">
+       <div id="idea-section" style="margin-bottom: 15px; padding: 10px; border-left: 3px solid var(--accent); background: rgba(0,242,255,0.05); font-size: 13px; line-height: 1.4;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="color:var(--accent);" id="idea-title">WINNING IDEA</strong>
+            <button id="btn-ask-ai" style="background:none; border:1px solid var(--accent); color:var(--accent); padding:2px 8px; border-radius:4px; cursor:pointer; font-size:10px; font-weight:bold;">✨ ASK COACH</button>
+          </div>
+          <div id="idea-text" class="ai-typing" style="color:#ccc;">Control the center and push the pawn.</div>
+       </div>
+
+       <div class="moves-wrap" id="moves-list">
+          <div style="padding:20px; text-align:center; color:#555;">Moves will appear here</div>
+       </div>
+
+       <button class="main-btn primary" id="btn-action">Next Scenario ➔</button>
+    </div>
+
+    <div class="panel" style="flex-direction: row; padding: 15px; gap: 10px;">
+      <div class="scenario-tabs" id="scenario-tabs" style="margin:0; flex-grow:1;">
+        <div class="tab active" onclick="setCategory('king-pawn')">Pawn</div>
+        <div class="tab" onclick="setCategory('king-rook')">Rook</div>
+        <div class="tab" onclick="setCategory('king-queen')">Queen</div>
+      </div>
+      <div style="display:flex; gap:5px;">
+        <button class="icon-btn" onclick="undo()">◀</button>
+        <button class="icon-btn" onclick="reset()">⟳</button>
+        <button class="icon-btn" onclick="askHint()">💡</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-import">
+  <div class="modal">
+    <h2 style="margin-top:0; font-weight:800;">Analysis Board</h2>
+    <p style="color:#888; font-size:13px; margin-bottom:15px;">Paste a game URL (Chess.com/Lichess) or raw PGN.</p>
+    <input type="text" class="input-dark" id="inp-url" placeholder="https://www.chess.com/game/live/...">
+    <div style="text-align:center; color:#444; font-size:11px; font-weight:bold; margin:5px 0;">— OR PASTE PGN —</div>
+    <textarea class="input-dark" id="inp-pgn" rows="5" placeholder="1. e4 e5 ..."></textarea>
+    <div id="import-status" style="color:#ff5555; font-size:12px; margin-bottom:15px; height:15px;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="main-btn" onclick="closeModal()" style="background:transparent; border-color:#444;">Cancel</button>
+      <button class="main-btn primary" onclick="submitImport()">Analyze Game</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { Chess } from 'https://esm.sh/chess.js@1.0.0-beta.8';
+import { Chessground } from 'https://esm.sh/chessground@9.0.0';
+
+const apiKey = ""; 
+
+// --- SELF-CONTAINED DATABASE ---
+const SCENARIOS = {
+    'king-pawn': [
+        { fen: '8/8/8/8/4k3/8/4P3/4K3 w - - 0 1', title: 'King in Front', idea: 'Place your King IN FRONT of the pawn to control key squares (d4, e4, f4).' },
+        { fen: '8/8/8/5k2/8/5P2/5K2/8 w - - 0 1', title: 'The Opposition', idea: 'Move your King to face the enemy King. This forces them to step aside.' },
+        { fen: '8/8/8/8/3k4/8/4P3/3K4 w - - 0 1', title: 'Key Squares', idea: 'Reach the 6th rank ahead of the pawn to force a win.' },
+        { fen: '8/8/8/8/8/2k5/1P6/1K6 w - - 0 1', title: 'Pawn Breakthrough', idea: 'Sacrifice or maneuver to get the pawn to the 8th rank.' },
+        { fen: '8/5k2/8/5P2/5K2/8/8/8 w - - 0 1', title: 'Cutting Off', idea: 'Use your King to shoulder-barge the enemy King away.' }
+    ],
+    'king-rook': [
+        { fen: '1R6/8/3P4/8/8/4k3/8/4K3 w - - 0 1', title: 'Lucena Position', idea: 'The Bridge! Use your Rook to shield your King from checks.' },
+        { fen: '2r5/8/8/8/4k3/8/3R4/3K4 w - - 0 1', title: 'Philidor Position', idea: 'Keep your Rook on the 6th rank to stop the King. Draw technique.' }
+    ],
+    'king-queen': [
+        { fen: '4k3/8/8/4K3/3Q4/8/8/8 w - - 0 1', title: 'Queen Mate', idea: 'Box the enemy King into a corner. Be careful of Stalemate!' },
+        { fen: '8/1P6/8/8/2k5/8/5q2/3K4 w - - 0 1', title: 'Queen vs Pawn', idea: 'Bring the King closer while checking.' }
+    ]
+};
+
+let game = new Chess();
+let cg = null;
+let stockfish = null;
+let mode = 'scenario'; 
+let currentFen = 'start';
+let currentCat = 'king-pawn';
+let serverIndex = -1;
+let botElo = 1200;
+let analysisQueue = [];
+let analysisResults = [];
+let isAnalysisRunning = false;
+let lastMoveSelected = null;
+
+// --- INIT ---
+async function init() {
+  const blob = await fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.0/stockfish.js').then(r=>r.text());
+  stockfish = new Worker(URL.createObjectURL(new Blob([blob], {type:'application/javascript'})));
+  stockfish.onmessage = onEngineMsg;
+
+  cg = Chessground(document.getElementById('board'), {
+    fen: 'start',
+    movable: { color: 'white', free: false, dests: getDests() },
+    events: { move: onUserMove },
+    animation: { enabled: true, duration: 250 }
+  });
+
+  // Fix: Wrap redraw in requestAnimationFrame to avoid ResizeObserver loop error
+  const ro = new ResizeObserver(() => {
+     window.requestAnimationFrame(() => {
+         if (cg) cg.redrawAll();
+     });
+  });
+  ro.observe(document.getElementById('board'));
+
+  // UI Bindings
+  window.undo = () => { game.undo(); game.undo(); update(); };
+  window.reset = () => { game.load(currentFen); update(); };
+  window.askHint = () => { stockfish.postMessage("go depth 20"); };
+  window.setCategory = (c) => { currentCat = c; loadScenario(); highlightTab(c); };
+  window.closeModal = () => document.getElementById('modal-import').style.display = 'none';
+  window.submitImport = doImport;
+  
+  document.getElementById('btn-action').onclick = handleActionBtn;
+  document.getElementById('btn-import').onclick = () => document.getElementById('modal-import').style.display = 'flex';
+  document.getElementById('btn-bot-mode').onclick = toggleBotMode;
+  document.getElementById('btn-ask-ai').onclick = askGeminiCoach;
+  document.getElementById('btn-copy-pgn').onclick = copyPGN; // New Copy Logic
+  
+  document.getElementById('bot-elo').oninput = (e) => {
+    botElo = e.target.value;
+    document.getElementById('bot-elo-disp').innerText = botElo;
+  };
+
+  loadScenario();
+}
+
+function copyPGN() {
+    const pgn = game.pgn();
+    navigator.clipboard.writeText(pgn).then(() => {
+        const btn = document.getElementById('btn-copy-pgn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✓";
+        setTimeout(() => btn.innerHTML = orig, 1500);
+    });
+}
+
+// --- GEMINI INTEGRATION ---
+
+async function askGeminiCoach() {
+    const btn = document.getElementById('btn-ask-ai');
+    const textBox = document.getElementById('idea-text');
+    const title = document.getElementById('idea-title');
+    
+    btn.innerText = "Thinking...";
+    btn.disabled = true;
+    textBox.innerText = "Contacting coach...";
+    
+    let prompt = "";
+    
+    if (mode === 'scenario') {
+        prompt = `You are a grandmaster chess coach. Briefly explain the winning plan for this position (FEN: ${game.fen()}). Keep it under 50 words.`;
+    } else if (mode === 'analysis' && lastMoveSelected) {
+        prompt = `You are a chess coach. In this position (FEN: ${lastMoveSelected.fen}), the move played was ${lastMoveSelected.san}. The engine eval is ${lastMoveSelected.eval} centipawns. Briefly explain why this move was good or bad in 1 sentence.`;
+    } else {
+        prompt = `Analyze this chess position (FEN: ${game.fen()}) and give 1 sentence of advice.`;
+    }
+
+    try {
+        // Call backend endpoint
+        const response = await fetch('/api/ask-coach', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: prompt,
+                apiKey: apiKey 
+            })
+        });
+
+        if (!response.ok) throw new Error("Coach Error");
+        const data = await response.json();
+        const text = data.candidates[0].content.parts[0].text;
+        
+        typewriterEffect(text, textBox);
+        title.innerText = "✨ COACH SAYS";
+        
+    } catch (e) {
+        console.error(e);
+        textBox.innerText = "Coach is offline. (Check Backend API Key)";
+    } finally {
+        btn.innerText = "✨ ASK COACH";
+        btn.disabled = false;
+    }
+}
+
+function typewriterEffect(text, element) {
+    element.innerText = "";
+    let i = 0;
+    const speed = 20; 
+    function type() {
+        if (i < text.length) {
+            element.innerText += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    type();
+}
+
+// --- CORE LOGIC ---
+
+async function loadScenario() {
+  mode = 'scenario';
+  document.body.className = '';
+  document.getElementById('status-badge').innerText = 'Trainer';
+  document.getElementById('btn-action').innerText = 'Next Scenario ➔';
+  document.getElementById('idea-section').classList.remove('hidden');
+  document.getElementById('scenario-tabs').classList.remove('hidden');
+
+  const list = SCENARIOS[currentCat];
+  let newIndex = Math.floor(Math.random() * list.length);
+  if (list.length > 1 && newIndex === serverIndex) {
+      newIndex = (newIndex + 1) % list.length;
+  }
+  serverIndex = newIndex;
+  const data = list[serverIndex];
+  
+  currentFen = data.fen;
+  game.load(currentFen);
+  update();
+  
+  document.getElementById('idea-title').innerText = data.title || "WINNING IDEA";
+  document.getElementById('idea-text').innerText = data.idea || "Win the position.";
+  stockfish.postMessage("setoption name Skill Level value 20");
+}
+
+function toggleBotMode() {
+  if (mode === 'bot') { loadScenario(); return; }
+  mode = 'bot';
+  currentFen = 'start';
+  game.reset();
+  update();
+  document.body.className = 'mode-bot';
+  document.getElementById('status-badge').innerText = 'VS BOT';
+  document.getElementById('status-badge').style.color = 'var(--danger)';
+  document.getElementById('idea-section').classList.add('hidden');
+  document.getElementById('bot-settings').classList.remove('hidden');
+  document.getElementById('btn-action').innerText = "Restart Match";
+}
+
+async function doImport() {
+  const url = document.getElementById('inp-url').value;
+  const pgnTxt = document.getElementById('inp-pgn').value;
+  const status = document.getElementById('import-status');
+  status.innerText = "Loading...";
+  let finalPgn = pgnTxt;
+
+  try {
+    if(url && !pgnTxt) {
+       // Simplified fallback for now
+       throw new Error("Auto-fetch requires backend. Please paste PGN text.");
+    }
+    
+    if(!finalPgn) throw new Error("Please paste PGN text.");
+    
+    try { game.loadPgn(finalPgn); } catch(err) { throw new Error("PGN parse failed."); }
+
+    startAnalysisMode();
+    closeModal();
+  } catch(e) {
+    status.innerText = e.message;
+    if(url) document.getElementById('inp-pgn').placeholder = "Auto-fetch failed. Paste PGN here.";
+  }
+}
+
+function startAnalysisMode() {
+  mode = 'analysis';
+  document.body.className = 'mode-analysis';
+  document.getElementById('status-badge').innerText = 'ANALYSIS';
+  document.getElementById('status-badge').style.color = 'var(--accent)';
+  document.getElementById('btn-action').innerText = "Run Game Review";
+  document.getElementById('idea-section').classList.remove('hidden');
+  document.getElementById('idea-title').innerText = "GAME REVIEW";
+  document.getElementById('idea-text').innerText = "Click a move and press 'Ask Coach' for insights.";
+  
+  currentFen = game.fen();
+  renderMoves(true);
+  game.reset(); 
+  update();
+}
+
+function runGameReview() {
+  const pgn = game.pgn();
+  const temp = new Chess(); temp.loadPgn(pgn); 
+  const history = temp.history({ verbose: true });
+  
+  analysisQueue = [];
+  analysisResults = [];
+  isAnalysisRunning = true;
+  
+  let g = new Chess();
+  analysisQueue.push({ fen: g.fen(), move: 'Start' });
+  
+  history.forEach(m => {
+    g.move(m);
+    analysisQueue.push({ fen: g.fen(), move: m.san });
+  });
+  
+  processQueue();
+}
+
+function processQueue() {
+  if(analysisQueue.length === 0) {
+    isAnalysisRunning = false;
+    document.getElementById('btn-action').innerText = "Review Complete";
+    renderMoves(true); 
+    return;
+  }
+  const task = analysisQueue[0];
+  const pct = Math.round((analysisResults.length / (analysisResults.length + analysisQueue.length)) * 100);
+  document.getElementById('btn-action').innerText = `Analyzing... ${pct}%`;
+  stockfish.postMessage(`position fen ${task.fen}`);
+  stockfish.postMessage("go depth 12"); 
+}
+
+function onUserMove(orig, dest) {
+  const move = game.move({ from: orig, to: dest, promotion: 'q' });
+  if(!move) { cg.set({fen:game.fen()}); return; }
+  update();
+  if (mode !== 'analysis' && !game.isGameOver()) {
+    setTimeout(() => {
+      let skill = 20; let depth = 12;
+      if(mode === 'bot') { skill = Math.floor((botElo - 400) / 120); depth = 6; }
+      stockfish.postMessage(`setoption name Skill Level value ${skill}`);
+      stockfish.postMessage(`position fen ${game.fen()}`);
+      stockfish.postMessage(`go depth ${depth}`);
+    }, 400);
+  }
+}
+
+function onEngineMsg(e) {
+  const line = e.data;
+  if (line.startsWith('info') && line.includes('score')) {
+    const sc = line.match(/score cp (-?\d+)/);
+    const mat = line.match(/score mate (-?\d+)/);
+    let val = 0;
+    if(mat) val = mat[1] > 0 ? 1000 : -1000;
+    else if(sc) val = parseInt(sc[1]);
+    
+    if (isAnalysisRunning && analysisQueue.length > 0) {
+        analysisQueue[0].eval = val; 
+    } else {
+        if(game.turn() === 'b') val = -val;
+        const p = Math.max(0, Math.min(100, 50 + (val/10)));
+        document.getElementById('eval-fill').style.height = p + '%';
+        document.getElementById('eval-bot').innerText = (val/100).toFixed(1);
+    }
+  }
+  if (line.startsWith('bestmove')) {
+    const moveStr = line.split(' ')[1];
+    if (isAnalysisRunning) {
+        const task = analysisQueue.shift();
+        task.bestMove = moveStr;
+        analysisResults.push(task);
+        processQueue();
+    }
+    else if (mode !== 'analysis' && game.turn() === 'b') {
+        game.move({ from: moveStr.slice(0,2), to: moveStr.slice(2,4), promotion:'q' });
+        update();
+    }
+  }
+}
+
+function update() {
+  cg.set({
+    fen: game.fen(),
+    turnColor: game.turn() === 'w' ? 'white' : 'black',
+    movable: { color: game.turn() === 'w' ? 'white' : 'black', dests: getDests() },
+    check: game.inCheck()
+  });
+  if(mode !== 'analysis') renderMoves(false);
+}
+
+function renderMoves(hasAnalysis) {
+  const list = document.getElementById('moves-list');
+  list.innerHTML = "";
+  const history = game.history({ verbose: true });
+  const dataSrc = hasAnalysis && analysisResults.length > 0 ? analysisResults.slice(1) : history;
+
+  dataSrc.forEach((m, i) => {
+      const div = document.createElement('div');
+      div.className = "move-row";
+      let evalTxt = "", mark = "", markClass = "";
+      if (hasAnalysis && m.eval !== undefined) {
+         const cp = m.eval; 
+         evalTxt = (cp / 100).toFixed(1);
+         if (Math.abs(cp) > 300) { mark = "!!"; markClass="cl-brilliant"; }
+      }
+      div.innerHTML = `<span style="color:#666">${Math.floor(i/2)+1}.</span><span style="font-weight:bold; color:#eee;">${m.san || m.move}</span><span class="eval-val">${evalTxt}</span><span class="classification ${markClass}">${mark}</span>`;
+      div.onclick = () => {
+         let g = new Chess();
+         for(let k=0; k<=i; k++) g.move(history[k]);
+         game.load(g.fen());
+         
+         // STORE CONTEXT FOR GEMINI
+         lastMoveSelected = { fen: g.fen(), san: m.san || m.move, eval: m.eval || 0 };
+         
+         update();
+      };
+      list.appendChild(div);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+function handleActionBtn() {
+    if(mode === 'scenario') loadScenario();
+    if(mode === 'bot') toggleBotMode(); 
+    if(mode === 'analysis') runGameReview();
+}
+
+function highlightTab(cat) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    // In prod add IDs
+}
+
+function getDests() {
+  const dests = new Map();
+  game.moves({verbose:true}).forEach(m => {
+    if(!dests.has(m.from)) dests.set(m.from, []);
+    dests.get(m.from).push(m.to);
+  });
+  return dests;
+}
+init();
+</script>
+</body>
+</html>
