@@ -17,7 +17,7 @@
   * { box-sizing: border-box; }
   body { background: radial-gradient(circle at top center, #121212 0%, #000000 80%); color: var(--text-main); font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden; }
   
-  .app-layout { display: grid; grid-template-columns: 40px auto 400px; gap: 30px; padding: 40px; max-width: 1600px; width: 100%; animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .app-layout { display: grid; grid-template-columns: 40px auto 420px; gap: 30px; padding: 40px; max-width: 1600px; width: 100%; animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
   
   .eval-track { width: 30px; height: 640px; background: #202020; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid #333; }
   .eval-fill { width: 100%; background: #fff; position: absolute; bottom: 0; height: 50%; transition: height 0.5s ease-out; }
@@ -29,12 +29,13 @@
   body.mode-bot #board { box-shadow: 0 0 60px rgba(255, 0, 85, 0.15); border-color: var(--danger); }
   body.mode-analysis #board { box-shadow: 0 0 60px rgba(0, 242, 255, 0.1); border-color: var(--accent); }
 
-  .hud { display: flex; flex-direction: column; gap: 20px; height: 640px; }
-  .panel { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; }
+  .hud { display: flex; flex-direction: column; gap: 15px; height: 640px; }
+  .panel { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; }
   
   .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
   .status-badge { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 100px; color: var(--accent); }
-  
+  .game-status { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-left: 10px; }
+
   .moves-wrap { flex-grow: 1; background: rgba(0,0,0,0.2); border-radius: 10px; overflow-y: auto; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); scrollbar-width: thin; }
   .move-row { display: grid; grid-template-columns: 30px 1fr 50px 30px; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: #aaa; transition: 0.1s; }
   .move-row:hover { background: rgba(255,255,255,0.05); color: #fff; }
@@ -46,21 +47,31 @@
   .main-btn:hover { border-color: #fff; transform: translateY(-1px); }
   .main-btn.primary { background: var(--accent); color: #000; border: none; font-weight: 800; }
   
+  .icon-btn { background: transparent; border: 1px solid var(--glass-border); color: #888; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+  .icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
   .scenario-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
   .tab { flex: 1; background: transparent; border: 1px solid var(--glass-border); color: #666; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; }
   .tab:hover { color: #ccc; }
   .tab.active { background: rgba(0, 242, 255, 0.1); color: var(--accent); border-color: var(--accent); }
 
-  .icon-btn { background: transparent; border: 1px solid var(--glass-border); color: #888; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-  .icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-
   .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
   .modal { background: #111; border: 1px solid #333; padding: 30px; border-radius: 16px; width: 500px; max-width: 90%; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
   .input-dark { width: 100%; background: #050505; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin: 10px 0; font-family: 'JetBrains Mono'; font-size: 13px; }
+  
   .hidden { display: none !important; }
   @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
   
-  /* Typing Effect for AI */
+  .report-container { display: none; flex-direction: column; gap: 15px; height: 100%; overflow-y: auto; }
+  .report-container.show { display: flex; }
+  .eval-graph { width: 100%; height: 80px; background: #202020; border-radius: 6px; position: relative; overflow: hidden; border-bottom: 1px solid #444; }
+  .graph-svg { width: 100%; height: 100%; display: block; }
+  .graph-line { fill: none; stroke: #fff; stroke-width: 2; stroke-linejoin: round; }
+  .graph-area { fill: rgba(255,255,255,0.1); stroke: none; }
+  .stats-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; font-size: 12px; color: #ccc; }
+  .stat-label { display: flex; align-items: center; gap: 6px; }
+  .stat-count { font-weight: bold; text-align: center; }
+  
   .ai-typing { font-family: 'Inter'; font-size: 13px; color: #e0e0e0; line-height: 1.5; min-height: 40px; white-space: pre-wrap; }
   .ai-typing::after { content: '▋'; animation: blink 1s infinite; color: var(--accent); }
   @keyframes blink { 50% { opacity: 0; } }
@@ -97,19 +108,30 @@
   </div>
 
   <div class="hud">
-    <div class="panel" style="padding-bottom: 15px;">
+    <!-- Header / Controls -->
+    <div class="panel" style="padding-bottom: 15px; flex-shrink: 0;">
       <div class="header-row">
-        <div class="status-badge" id="status-badge">Trainer</div>
+        <div style="display:flex; align-items:center;">
+            <div class="status-badge" id="status-badge">Trainer</div>
+            <span id="game-status" class="game-status">Ready</span>
+        </div>
         <div style="display:flex; gap:5px;">
-            <!-- COPY BUTTON -->
             <button class="icon-btn" id="btn-copy-pgn" title="Copy PGN">📋</button>
+            <button class="icon-btn" id="bot-settings-btn" title="Settings">⚙️</button>
         </div>
       </div>
-      <div style="display: flex; gap: 10px;">
-        <button class="main-btn" id="btn-import" style="flex: 1;">📥 Import Game</button>
+      
+      <div class="bot-controls" style="display:flex; gap:10px;">
+        <button class="main-btn" id="btn-import" style="flex: 1;">📥 Import</button>
         <button class="main-btn" id="btn-bot-mode" style="flex: 1; border-color: var(--danger); color: var(--danger);">⚔️ Play Bot</button>
       </div>
-      <div id="bot-settings" class="hidden" style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+      
+      <!-- Settings -->
+      <div id="bot-settings" class="hidden" style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid #333;">
+        <div style="margin-bottom:15px;">
+            <div style="font-size:11px; color:#aaa; margin-bottom:5px;">GEMINI API KEY</div>
+            <input type="password" id="api-key-input" class="input-dark" style="margin:0;" placeholder="Paste API Key here...">
+        </div>
         <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:5px;">
            <span>Bot Level</span> <span id="bot-elo-disp" style="color:var(--danger); font-weight:bold;">1200</span>
         </div>
@@ -117,24 +139,56 @@
       </div>
     </div>
 
-    <div class="panel" style="flex-grow: 1;">
-       <div id="idea-section" style="margin-bottom: 15px; padding: 10px; border-left: 3px solid var(--accent); background: rgba(0,242,255,0.05); font-size: 13px; line-height: 1.4;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <strong style="color:var(--accent);" id="idea-title">WINNING IDEA</strong>
-            <button id="btn-ask-ai" style="background:none; border:1px solid var(--accent); color:var(--accent); padding:2px 8px; border-radius:4px; cursor:pointer; font-size:10px; font-weight:bold;">✨ ASK COACH</button>
+    <!-- MOVES / REPORT -->
+    <div class="panel moves-panel">
+       
+       <!-- Report View (Hidden until analysis done) -->
+       <div id="game-report" class="report-container">
+          <!-- Graph -->
+          <div class="eval-graph" id="eval-graph"></div>
+          
+          <!-- Player Stats -->
+          <div class="player-card">
+              <div class="player-info"><div class="player-avatar p-white">♔</div> White</div>
+              <div class="player-acc" id="acc-white">--</div>
           </div>
-          <div id="idea-text" class="ai-typing" style="color:#ccc;">Control the center and push the pawn.</div>
+          <div class="player-card">
+              <div class="player-info"><div class="player-avatar p-black">♚</div> Black</div>
+              <div class="player-acc" id="acc-black">--</div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid" id="stats-grid"></div>
+          
+          <button class="main-btn" onclick="closeReport()">Back to Moves</button>
        </div>
 
-       <div class="moves-wrap" id="moves-list">
-          <div style="padding:20px; text-align:center; color:#555;">Moves will appear here</div>
-       </div>
+       <!-- Moves View -->
+       <div id="moves-view" style="display:flex; flex-direction:column; height:100%;">
+           <div id="idea-section" style="margin-bottom: 10px; padding: 10px; border-left: 3px solid var(--accent); background: rgba(0,242,255,0.05); font-size: 12px; line-height: 1.4;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <strong style="color:var(--accent);" id="idea-title">WINNING IDEA</strong>
+                <button id="btn-ask-ai" style="background:none; border:1px solid var(--accent); color:var(--accent); padding:2px 8px; border-radius:4px; cursor:pointer; font-size:9px; font-weight:bold;">✨ COACH</button>
+              </div>
+              <div id="idea-text" class="ai-typing" style="color:#ccc;">Control the center.</div>
+           </div>
 
-       <button class="main-btn primary" id="btn-action">Next Scenario ➔</button>
+           <div class="moves-header" style="display:flex; justify-content:space-between; padding:0 0 10px 0;">
+               <span style="font-size:12px; color:#aaa;">Moves</span>
+               <button id="run-analysis-btn" style="font-size:10px; padding:4px 8px; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent); border-radius:4px; cursor:pointer;">Run Review</button>
+           </div>
+
+           <div class="moves-wrap" id="moves-list">
+              <div style="padding:20px; text-align:center; color:#555;">Moves will appear here</div>
+           </div>
+           
+           <button class="main-btn primary" id="btn-action" style="margin-top:10px;">Next Scenario ➔</button>
+       </div>
     </div>
 
-    <div class="panel" style="flex-direction: row; padding: 15px; gap: 10px;">
-      <div class="scenario-tabs" id="scenario-tabs" style="margin:0; flex-grow:1;">
+    <!-- Footer -->
+    <div class="panel" style="flex-direction: row; padding: 15px; gap: 10px; height: auto; flex-shrink: 0;">
+      <div class="scenario-tabs" id="scenario-tabs" style="margin:0; flex-grow:1; display:flex; gap:5px;">
         <div class="tab active" onclick="setCategory('king-pawn')">Pawn</div>
         <div class="tab" onclick="setCategory('king-rook')">Rook</div>
         <div class="tab" onclick="setCategory('king-queen')">Queen</div>
@@ -151,14 +205,14 @@
 <div class="modal-overlay" id="modal-import">
   <div class="modal">
     <h2 style="margin-top:0; font-weight:800;">Analysis Board</h2>
-    <p style="color:#888; font-size:13px; margin-bottom:15px;">Paste a game URL (Chess.com/Lichess) or raw PGN.</p>
+    <p style="color:#888; font-size:13px; margin-bottom:15px;">Paste a game URL or PGN.</p>
     <input type="text" class="input-dark" id="inp-url" placeholder="https://www.chess.com/game/live/...">
     <div style="text-align:center; color:#444; font-size:11px; font-weight:bold; margin:5px 0;">— OR PASTE PGN —</div>
     <textarea class="input-dark" id="inp-pgn" rows="5" placeholder="1. e4 e5 ..."></textarea>
     <div id="import-status" style="color:#ff5555; font-size:12px; margin-bottom:15px; height:15px;"></div>
     <div style="display:flex; gap:10px;">
       <button class="main-btn" onclick="closeModal()" style="background:transparent; border-color:#444;">Cancel</button>
-      <button class="main-btn primary" onclick="submitImport()">Analyze Game</button>
+      <button class="main-btn primary" onclick="submitImport()">Analyze</button>
     </div>
   </div>
 </div>
@@ -167,27 +221,7 @@
 import { Chess } from 'https://esm.sh/chess.js@1.0.0-beta.8';
 import { Chessground } from 'https://esm.sh/chessground@9.0.0';
 
-const apiKey = ""; 
-
-// --- SELF-CONTAINED DATABASE ---
-const SCENARIOS = {
-    'king-pawn': [
-        { fen: '8/8/8/8/4k3/8/4P3/4K3 w - - 0 1', title: 'King in Front', idea: 'Place your King IN FRONT of the pawn to control key squares (d4, e4, f4).' },
-        { fen: '8/8/8/5k2/8/5P2/5K2/8 w - - 0 1', title: 'The Opposition', idea: 'Move your King to face the enemy King. This forces them to step aside.' },
-        { fen: '8/8/8/8/3k4/8/4P3/3K4 w - - 0 1', title: 'Key Squares', idea: 'Reach the 6th rank ahead of the pawn to force a win.' },
-        { fen: '8/8/8/8/8/2k5/1P6/1K6 w - - 0 1', title: 'Pawn Breakthrough', idea: 'Sacrifice or maneuver to get the pawn to the 8th rank.' },
-        { fen: '8/5k2/8/5P2/5K2/8/8/8 w - - 0 1', title: 'Cutting Off', idea: 'Use your King to shoulder-barge the enemy King away.' }
-    ],
-    'king-rook': [
-        { fen: '1R6/8/3P4/8/8/4k3/8/4K3 w - - 0 1', title: 'Lucena Position', idea: 'The Bridge! Use your Rook to shield your King from checks.' },
-        { fen: '2r5/8/8/8/4k3/8/3R4/3K4 w - - 0 1', title: 'Philidor Position', idea: 'Keep your Rook on the 6th rank to stop the King. Draw technique.' }
-    ],
-    'king-queen': [
-        { fen: '4k3/8/8/4K3/3Q4/8/8/8 w - - 0 1', title: 'Queen Mate', idea: 'Box the enemy King into a corner. Be careful of Stalemate!' },
-        { fen: '8/1P6/8/8/2k5/8/5q2/3K4 w - - 0 1', title: 'Queen vs Pawn', idea: 'Bring the King closer while checking.' }
-    ]
-};
-
+// --- APP STATE ---
 let game = new Chess();
 let cg = null;
 let stockfish = null;
@@ -200,8 +234,24 @@ let analysisQueue = [];
 let analysisResults = [];
 let isAnalysisRunning = false;
 let lastMoveSelected = null;
+let userApiKey = localStorage.getItem("chess_api_key") || "";
+let importedPGN = ""; 
 
-// --- INIT ---
+const SCENARIOS = {
+    'king-pawn': [
+        { fen: '8/8/8/8/4k3/8/4P3/4K3 w - - 0 1', title: 'King in Front', idea: 'Place your King IN FRONT of the pawn to control key squares (d4, e4, f4).' },
+        { fen: '8/8/8/5k2/8/5P2/5K2/8 w - - 0 1', title: 'The Opposition', idea: 'Move your King to face the enemy King. This forces them to step aside.' },
+        { fen: '8/8/8/8/3k4/8/4P3/3K4 w - - 0 1', title: 'Key Squares', idea: 'Reach the 6th rank ahead of the pawn to force a win.' },
+        { fen: '8/8/8/8/8/2k5/1P6/1K6 w - - 0 1', title: 'Pawn Breakthrough', idea: 'Sacrifice or maneuver to get the pawn to the 8th rank.' }
+    ],
+    'king-rook': [
+        { fen: '1R6/8/3P4/8/8/4k3/8/4K3 w - - 0 1', title: 'Lucena Position', idea: 'The Bridge! Use your Rook to shield your King from checks.' }
+    ],
+    'king-queen': [
+        { fen: '4k3/8/8/4k3/3Q4/8/8/8 w - - 0 1', title: 'Queen Mate', idea: 'Box the enemy King into a corner.' }
+    ]
+};
+
 async function init() {
   const blob = await fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.0/stockfish.js').then(r=>r.text());
   stockfish = new Worker(URL.createObjectURL(new Blob([blob], {type:'application/javascript'})));
@@ -213,28 +263,35 @@ async function init() {
     events: { move: onUserMove },
     animation: { enabled: true, duration: 250 }
   });
-
-  // Fix: Wrap redraw in requestAnimationFrame to avoid ResizeObserver loop error
+  
   const ro = new ResizeObserver(() => {
-     window.requestAnimationFrame(() => {
-         if (cg) cg.redrawAll();
-     });
+     window.requestAnimationFrame(() => { if (cg) cg.redrawAll(); });
   });
   ro.observe(document.getElementById('board'));
 
-  // UI Bindings
+  // Binds
   window.undo = () => { game.undo(); game.undo(); update(); };
   window.reset = () => { game.load(currentFen); update(); };
   window.askHint = () => { stockfish.postMessage("go depth 20"); };
   window.setCategory = (c) => { currentCat = c; loadScenario(); highlightTab(c); };
   window.closeModal = () => document.getElementById('modal-import').style.display = 'none';
   window.submitImport = doImport;
-  
+  window.closeReport = () => {
+      document.getElementById('game-report').classList.remove('show');
+      document.getElementById('moves-view').style.display = 'flex';
+  };
+
   document.getElementById('btn-action').onclick = handleActionBtn;
   document.getElementById('btn-import').onclick = () => document.getElementById('modal-import').style.display = 'flex';
   document.getElementById('btn-bot-mode').onclick = toggleBotMode;
   document.getElementById('btn-ask-ai').onclick = askGeminiCoach;
-  document.getElementById('btn-copy-pgn').onclick = copyPGN; // New Copy Logic
+  document.getElementById('btn-copy-pgn').onclick = copyPGN;
+  document.getElementById('bot-settings-btn').onclick = () => document.getElementById('bot-settings').classList.toggle('hidden');
+  document.getElementById('run-analysis-btn').onclick = runGameReview;
+  
+  const keyInput = document.getElementById('api-key-input');
+  keyInput.value = userApiKey;
+  keyInput.onchange = (e) => { userApiKey = e.target.value; localStorage.setItem("chess_api_key", userApiKey); };
   
   document.getElementById('bot-elo').oninput = (e) => {
     botElo = e.target.value;
@@ -244,58 +301,416 @@ async function init() {
   loadScenario();
 }
 
-function copyPGN() {
-    const pgn = game.pgn();
-    navigator.clipboard.writeText(pgn).then(() => {
-        const btn = document.getElementById('btn-copy-pgn');
-        const orig = btn.innerHTML;
-        btn.innerHTML = "✓";
-        setTimeout(() => btn.innerHTML = orig, 1500);
+// --- LOGIC ---
+
+async function loadScenario(type) {
+  const targetCat = type || currentCat;
+  mode = 'scenario';
+  currentCat = targetCat;
+  importedPGN = "";
+  
+  // Safe UI Reset
+  document.body.className = '';
+  
+  const statusBadge = document.getElementById('status-badge');
+  if(statusBadge) statusBadge.innerText = 'Trainer';
+  
+  const gameStatus = document.getElementById('game-status');
+  if(gameStatus) gameStatus.innerText = "Win this position";
+
+  const btnAction = document.getElementById('btn-action');
+  if(btnAction) btnAction.innerText = 'Next Scenario ➔';
+  
+  const gameReport = document.getElementById('game-report');
+  if(gameReport) gameReport.classList.remove('show');
+
+  const movesView = document.getElementById('moves-view');
+  if(movesView) movesView.style.display = 'flex';
+
+  const ideaSection = document.getElementById('idea-section');
+  if(ideaSection) ideaSection.classList.remove('hidden');
+  
+  const scenarioTabs = document.getElementById('scenario-tabs');
+  if(scenarioTabs) scenarioTabs.classList.remove('hidden');
+  
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  
+  const list = SCENARIOS[currentCat];
+  let newIndex = Math.floor(Math.random() * list.length);
+  if (list.length > 1 && newIndex === serverIndex) {
+    newIndex = (newIndex + 1) % list.length;
+  }
+  serverIndex = newIndex;
+  const data = list[serverIndex];
+
+  currentFen = data.fen;
+  game.load(currentFen);
+  
+  update();
+  
+  const ideaTitle = document.getElementById('idea-title');
+  if(ideaTitle) ideaTitle.innerText = data.title || "WINNING IDEA";
+
+  const ideaText = document.getElementById('idea-text');
+  if(ideaText) {
+      ideaText.innerText = data.idea || "Win the position.";
+      ideaText.className = ""; 
+  }
+  
+  if (stockfish) stockfish.postMessage("setoption name Skill Level value 20"); 
+}
+
+function update() {
+  cg.set({
+    fen: game.fen(),
+    turnColor: game.turn() === 'w' ? 'white' : 'black',
+    movable: { color: game.turn() === 'w' ? 'white' : 'black', dests: getDests() },
+    check: game.inCheck()
+  });
+  
+  const statusEl = document.getElementById('game-status');
+  if(statusEl) {
+      if (game.isCheckmate()) {
+          statusEl.innerText = "Checkmate!";
+          statusEl.style.color = "var(--col-brilliant)";
+      } else if (game.isDraw() || game.isStalemate() || game.isInsufficientMaterial()) {
+          statusEl.innerText = "Draw / Stalemate";
+          statusEl.style.color = "var(--col-mistake)";
+      } else {
+          if(mode === 'bot') statusEl.innerText = game.turn()==='w' ? "Your Turn" : "Bot Thinking...";
+          else statusEl.innerText = "White to move";
+          statusEl.style.color = "#888";
+      }
+  }
+
+  if(mode !== 'analysis') renderMoves(false);
+}
+
+function onEngineMsg(e) {
+  const line = e.data;
+  
+  if (line.startsWith('info') && line.includes('score') && !isAnalysisRunning) {
+    parseEval(line);
+  }
+  
+  if (line.startsWith('bestmove') && mode === 'bot' && !isAnalysisRunning && game.turn() === 'b') {
+    const move = line.split(' ')[1];
+    game.move({ from: move.slice(0,2), to: move.slice(2,4), promotion:'q' });
+    update();
+    startEval();
+  }
+  
+  if (isAnalysisRunning) {
+      if (line.startsWith('info') && line.includes('score')) {
+          const match = line.match(/score (cp|mate) (-?\d+)/);
+          if(match && analysisQueue.length > 0) {
+              let val = parseInt(match[2]);
+              if(match[1] === 'mate') val = val > 0 ? 2000 : -2000;
+              const task = analysisQueue[0];
+              if (task.color === 'b') val = -val;
+              task.eval = val;
+          }
+      }
+      if (line.startsWith('bestmove')) {
+          const finishedTask = analysisQueue.shift();
+          finishedTask.bestMove = line.split(' ')[1];
+          analysisResults.push(finishedTask);
+          processNextAnalysisTask();
+      }
+  }
+}
+
+function processNextAnalysisTask() {
+    if (analysisQueue.length === 0) {
+        finishAnalysis();
+        return;
+    }
+    const task = analysisQueue[0];
+    const pct = Math.round((analysisResults.length / (analysisResults.length + analysisQueue.length)) * 100);
+    document.getElementById('run-analysis-btn').innerText = `Analyzing... ${pct}%`;
+    stockfish.postMessage(`position fen ${task.fen}`);
+    stockfish.postMessage("go depth 10");
+}
+
+function runGameReview() {
+  const pgnToAnalyze = importedPGN || game.pgn();
+  const tempChess = new Chess();
+  try { tempChess.loadPgn(pgnToAnalyze); } catch(e){}
+
+  if (tempChess.history().length === 0) {
+      alert("No moves to analyze! Play or import a game first.");
+      return;
+  }
+  
+  analysisQueue = []; analysisResults = []; isAnalysisRunning = true;
+  let g = new Chess();
+  analysisQueue.push({ fen: g.fen(), move: 'Start', color:'w', eval:0 });
+  const history = tempChess.history({ verbose: true });
+  history.forEach((m, i) => {
+    g.move(m);
+    analysisQueue.push({ fen: g.fen(), move: m.san, color: g.turn(), index:i });
+  });
+  processNextAnalysisTask();
+}
+
+function finishAnalysis() {
+    isAnalysisRunning = false;
+    document.getElementById('run-analysis-btn').innerText = "Analysis Done";
+    
+    const stats = { brilliant: {w:0, b:0, icon:'!!', class:'bg-brilliant'}, great: {w:0, b:0, icon:'!', class:'bg-great'}, best: {w:0, b:0, icon:'★', class:'bg-best'}, excellent: {w:0, b:0, icon:'👍', class:'bg-best'}, good: {w:0, b:0, icon:'✓', class:'bg-best'}, book: {w:0, b:0, icon:'📖', class:'bg-book'}, inaccuracy: {w:0, b:0, icon:'?!', class:'bg-inaccuracy'}, mistake: {w:0, b:0, icon:'?', class:'bg-mistake'}, blunder: {w:0, b:0, icon:'??', class:'bg-blunder'}, miss: {w:0, b:0, icon:'X', class:'bg-blunder'} };
+    
+    let whiteAcc = 0, blackAcc = 0, wMoves = 0, bMoves = 0;
+    const evalsForGraph = [];
+
+    for(let i=1; i<analysisResults.length; i++) {
+        const prev = analysisResults[i-1];
+        const curr = analysisResults[i];
+        const isWhite = (i % 2 === 1); 
+        
+        const winProbPrev = getWinProb(prev.eval);
+        const winProbCurr = getWinProb(curr.eval);
+        
+        let delta = isWhite ? (winProbPrev - winProbCurr) : ((100-winProbPrev) - (100-winProbCurr));
+        if (delta < 0) delta = 0;
+
+        let cat = 'good';
+        if (delta < 2) cat = 'best';
+        else if (delta < 5) cat = 'excellent';
+        else if (delta < 10) cat = 'good';
+        else if (delta < 20) cat = 'inaccuracy';
+        else if (delta < 40) cat = 'mistake';
+        else cat = 'blunder';
+
+        const moveAcc = Math.max(0, 100 - (delta * 1.5));
+        if (isWhite) { whiteAcc += moveAcc; wMoves++; stats[cat].w++; }
+        else { blackAcc += moveAcc; bMoves++; stats[cat].b++; }
+
+        curr.classification = cat;
+        evalsForGraph.push(curr.eval);
+    }
+    
+    document.getElementById('moves-view').style.display = 'none';
+    document.getElementById('game-report').classList.add('show');
+    
+    document.getElementById('acc-white').innerText = wMoves ? Math.round(whiteAcc/wMoves) : "-";
+    document.getElementById('acc-black').innerText = bMoves ? Math.round(blackAcc/bMoves) : "-";
+    
+    drawEvalChart(evalsForGraph);
+    renderStatsGrid(stats);
+    renderMoves(true);
+}
+
+function renderStatsGrid(stats) {
+    const grid = document.getElementById('stats-grid');
+    grid.innerHTML = "";
+    const rows = ['brilliant','great','best','excellent','good','inaccuracy','mistake','blunder'];
+    rows.forEach(key => {
+        const s = stats[key];
+        grid.innerHTML += `<div class="stat-count">${s.w}</div><div class="stat-label"><div class="stat-icon ${s.class}">${s.icon}</div>${key.charAt(0).toUpperCase() + key.slice(1)}</div><div class="stat-count">${s.b}</div>`;
     });
 }
 
-// --- GEMINI INTEGRATION ---
+function drawEvalChart(evals) {
+    const el = document.getElementById('eval-graph');
+    el.innerHTML = "";
+    if(evals.length < 2) return;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    const max = 1000; 
+    let path = `M 0,${h/2} `;
+    const step = w / (evals.length - 1);
+    evals.forEach((val, i) => {
+        const clamped = Math.max(-max, Math.min(max, val));
+        const y = h/2 - (clamped / max) * (h/2);
+        path += `L ${i*step},${y} `;
+    });
+    const areaPath = path + `L ${w},${h/2} L 0,${h/2} Z`;
+    el.innerHTML = `<svg class="graph-svg" viewBox="0 0 ${w} ${h}"><path d="${areaPath}" class="graph-area" /><path d="${path}" class="graph-line" /></svg>`;
+}
+
+function getWinProb(cp) { return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * cp)) - 1); }
+
+function extractEval(line) {
+    const match = line.match(/score (cp|mate) (-?\d+)/);
+    if(match) {
+        let val = parseInt(match[2]);
+        if(match[1] === 'mate') val = val > 0 ? 2000 : -2000;
+        return val;
+    }
+    return 0;
+}
+
+function renderMoves(hasAnalysis) {
+  const list = document.getElementById('moves-list');
+  if(!list) return;
+  list.innerHTML = "";
+  
+  let dataSrc = [];
+  if(hasAnalysis && analysisResults.length > 0) {
+      dataSrc = analysisResults.slice(1);
+  } else {
+      if(importedPGN) {
+          let tmp = new Chess();
+          try{ tmp.loadPgn(importedPGN); }catch(e){}
+          dataSrc = tmp.history({ verbose: true }).map(m => ({san: m.san, move: m.san}));
+      } else {
+          dataSrc = game.history({ verbose: true }).map(m => ({san: m.san, move: m.san}));
+      }
+  }
+
+  dataSrc.forEach((m, i) => {
+      const div = document.createElement('div');
+      div.className = "move-row";
+      let evalTxt = "", mark = "", markClass = "";
+      if (hasAnalysis && m.classification) {
+          const icons = {best:'★', brilliant:'!!', good:'✓', mistake:'?', blunder:'??', inaccuracy:'?!', great:'!', excellent:'👍', book:'📖'};
+          const classes = {best:'bg-best', brilliant:'bg-brilliant', good:'bg-good', mistake:'bg-mistake', blunder:'bg-blunder', inaccuracy:'bg-inaccuracy', great:'bg-great', excellent:'bg-best', book:'bg-book'};
+          mark = icons[m.classification] || "";
+          let bgClass = classes[m.classification] || "";
+          markClass = `move-icon ${bgClass}`; 
+          evalTxt = (m.eval / 100).toFixed(1);
+      }
+      div.innerHTML = `<span style="color:#666">${Math.ceil((i+1)/2)}.</span><span style="font-weight:bold; color:#eee;">${m.san || m.move}</span><span class="eval-val">${evalTxt}</span><span class="${markClass}">${mark}</span>`;
+      div.onclick = () => {
+         let g = new Chess();
+         const movesToPlay = hasAnalysis ? analysisResults.slice(1) : dataSrc;
+         for(let k=0; k<=i; k++) g.move(movesToPlay[k].san || movesToPlay[k].move);
+         game.load(g.fen());
+         lastMoveSelected = { fen: g.fen(), san: m.san || m.move, eval: m.eval || 0 };
+         update();
+      };
+      list.appendChild(div);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+function handleActionBtn() {
+    if(mode === 'scenario') loadScenario();
+    if(mode === 'bot') toggleBotMode(); 
+    if(mode === 'analysis') runGameReview();
+}
+
+async function doImport() {
+  const url = document.getElementById('inp-url').value;
+  const pgnTxt = document.getElementById('inp-pgn').value;
+  const status = document.getElementById('import-status');
+  status.innerText = "Loading...";
+  let finalPgn = pgnTxt;
+  try {
+    if(url && !pgnTxt) {
+       try {
+          let platform = url.includes('chess.com') ? 'chess.com' : 'lichess';
+          let id = url.split('/').pop();
+          const res = await fetch(`/api/fetch-game?platform=${platform}&gameId=${id}`);
+          const d = await res.json();
+          finalPgn = d.pgn;
+       } catch(e) { throw new Error("Auto-fetch failed. Please paste PGN."); }
+    }
+    if(!finalPgn) throw new Error("Please paste PGN text.");
+    try { game.loadPgn(finalPgn); } catch(err) { throw new Error("PGN parse failed."); }
+    
+    importedPGN = finalPgn;
+    startAnalysisMode();
+    closeModal();
+  } catch(e) { status.innerText = e.message; }
+}
+
+function startAnalysisMode() {
+  mode = 'analysis';
+  document.body.className = 'mode-analysis';
+  document.getElementById('status-badge').innerText = 'ANALYSIS';
+  document.getElementById('status-badge').style.color = 'var(--accent)';
+  document.getElementById('btn-action').innerText = "Run Game Review";
+  
+  // Reset visual but keep PGN
+  currentFen = game.fen();
+  renderMoves(false);
+  game.reset(); 
+  update();
+}
+
+function startEval() {
+  stockfish.postMessage("stop");
+  stockfish.postMessage(`position fen ${game.fen()}`);
+  stockfish.postMessage("go depth 15");
+}
+
+function parseEval(line) {
+    const match = line.match(/score (cp|mate) (-?\d+)/);
+    if(match) {
+        let val = parseInt(match[2]);
+        if(match[1] === 'mate') val = val > 0 ? 2000 : -2000;
+        if(game.turn() === 'b') val = -val; 
+        const maxCp = 1000;
+        const clamped = Math.max(-maxCp, Math.min(maxCp, val));
+        const percent = ((clamped + maxCp) / (2 * maxCp)) * 100;
+        document.getElementById('eval-fill').style.height = `${percent}%`;
+    }
+}
+
+function getDests() {
+  const dests = new Map();
+  game.moves({verbose:true}).forEach(m => {
+    if(!dests.has(m.from)) dests.set(m.from, []);
+    dests.get(m.from).push(m.to);
+  });
+  return dests;
+}
+function onUserMove(orig, dest) {
+  const move = game.move({ from: orig, to: dest, promotion: 'q' });
+  if(!move) { cg.set({fen:game.fen()}); return; }
+  update();
+  if (mode !== 'analysis' && !game.isGameOver()) {
+    setTimeout(() => {
+      let skill = 20; let depth = 12;
+      if(mode === 'bot') { skill = Math.floor((botElo - 400) / 120); depth = 6; }
+      stockfish.postMessage(`setoption name Skill Level value ${skill}`);
+      stockfish.postMessage(`position fen ${game.fen()}`);
+      stockfish.postMessage(`go depth ${depth}`);
+    }, 400);
+  }
+}
+
+function toggleBotMode() {
+  if (mode === 'bot') { loadScenario(); return; }
+  mode = 'bot';
+  currentFen = 'start';
+  game.reset();
+  update();
+  document.body.className = 'mode-bot';
+  document.getElementById('status-badge').innerText = 'VS BOT';
+  document.getElementById('status-badge').style.color = 'var(--danger)';
+  document.getElementById('bot-settings').classList.remove('hidden');
+  document.getElementById('btn-action').innerText = "Restart Match";
+}
 
 async function askGeminiCoach() {
     const btn = document.getElementById('btn-ask-ai');
     const textBox = document.getElementById('idea-text');
     const title = document.getElementById('idea-title');
-    
     btn.innerText = "Thinking...";
     btn.disabled = true;
     textBox.innerText = "Contacting coach...";
-    
+    textBox.className = "ai-typing"; 
     let prompt = "";
-    
-    if (mode === 'scenario') {
-        prompt = `You are a grandmaster chess coach. Briefly explain the winning plan for this position (FEN: ${game.fen()}). Keep it under 50 words.`;
-    } else if (mode === 'analysis' && lastMoveSelected) {
-        prompt = `You are a chess coach. In this position (FEN: ${lastMoveSelected.fen}), the move played was ${lastMoveSelected.san}. The engine eval is ${lastMoveSelected.eval} centipawns. Briefly explain why this move was good or bad in 1 sentence.`;
-    } else {
-        prompt = `Analyze this chess position (FEN: ${game.fen()}) and give 1 sentence of advice.`;
-    }
+    if (mode === 'scenario') prompt = `You are a grandmaster chess coach. Briefly explain the winning plan for this position (FEN: ${game.fen()}). Keep it under 50 words.`;
+    else if (mode === 'analysis' && lastMoveSelected) prompt = `You are a chess coach. In this position (FEN: ${lastMoveSelected.fen}), the move played was ${lastMoveSelected.san}. The engine eval is ${lastMoveSelected.eval} centipawns. Briefly explain why this move was good or bad in 1 sentence.`;
+    else prompt = `Analyze this chess position (FEN: ${game.fen()}) and give 1 sentence of advice.`;
 
     try {
-        // Call backend endpoint
         const response = await fetch('/api/ask-coach', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                prompt: prompt,
-                apiKey: apiKey 
-            })
+            body: JSON.stringify({ prompt: prompt, apiKey: userApiKey })
         });
-
         if (!response.ok) throw new Error("Coach Error");
         const data = await response.json();
         const text = data.candidates[0].content.parts[0].text;
-        
         typewriterEffect(text, textBox);
         title.innerText = "✨ COACH SAYS";
-        
     } catch (e) {
         console.error(e);
-        textBox.innerText = "Coach is offline. (Check Backend API Key)";
+        textBox.innerText = "Coach is offline. (Check API Key in Settings)";
     } finally {
         btn.innerText = "✨ ASK COACH";
         btn.disabled = false;
@@ -316,230 +731,9 @@ function typewriterEffect(text, element) {
     type();
 }
 
-// --- CORE LOGIC ---
+function highlightTab(c) {} 
+function copyPGN() { navigator.clipboard.writeText(game.pgn()); }
 
-async function loadScenario() {
-  mode = 'scenario';
-  document.body.className = '';
-  document.getElementById('status-badge').innerText = 'Trainer';
-  document.getElementById('btn-action').innerText = 'Next Scenario ➔';
-  document.getElementById('idea-section').classList.remove('hidden');
-  document.getElementById('scenario-tabs').classList.remove('hidden');
-
-  const list = SCENARIOS[currentCat];
-  let newIndex = Math.floor(Math.random() * list.length);
-  if (list.length > 1 && newIndex === serverIndex) {
-      newIndex = (newIndex + 1) % list.length;
-  }
-  serverIndex = newIndex;
-  const data = list[serverIndex];
-  
-  currentFen = data.fen;
-  game.load(currentFen);
-  update();
-  
-  document.getElementById('idea-title').innerText = data.title || "WINNING IDEA";
-  document.getElementById('idea-text').innerText = data.idea || "Win the position.";
-  stockfish.postMessage("setoption name Skill Level value 20");
-}
-
-function toggleBotMode() {
-  if (mode === 'bot') { loadScenario(); return; }
-  mode = 'bot';
-  currentFen = 'start';
-  game.reset();
-  update();
-  document.body.className = 'mode-bot';
-  document.getElementById('status-badge').innerText = 'VS BOT';
-  document.getElementById('status-badge').style.color = 'var(--danger)';
-  document.getElementById('idea-section').classList.add('hidden');
-  document.getElementById('bot-settings').classList.remove('hidden');
-  document.getElementById('btn-action').innerText = "Restart Match";
-}
-
-async function doImport() {
-  const url = document.getElementById('inp-url').value;
-  const pgnTxt = document.getElementById('inp-pgn').value;
-  const status = document.getElementById('import-status');
-  status.innerText = "Loading...";
-  let finalPgn = pgnTxt;
-
-  try {
-    if(url && !pgnTxt) {
-       // Simplified fallback for now
-       throw new Error("Auto-fetch requires backend. Please paste PGN text.");
-    }
-    
-    if(!finalPgn) throw new Error("Please paste PGN text.");
-    
-    try { game.loadPgn(finalPgn); } catch(err) { throw new Error("PGN parse failed."); }
-
-    startAnalysisMode();
-    closeModal();
-  } catch(e) {
-    status.innerText = e.message;
-    if(url) document.getElementById('inp-pgn').placeholder = "Auto-fetch failed. Paste PGN here.";
-  }
-}
-
-function startAnalysisMode() {
-  mode = 'analysis';
-  document.body.className = 'mode-analysis';
-  document.getElementById('status-badge').innerText = 'ANALYSIS';
-  document.getElementById('status-badge').style.color = 'var(--accent)';
-  document.getElementById('btn-action').innerText = "Run Game Review";
-  document.getElementById('idea-section').classList.remove('hidden');
-  document.getElementById('idea-title').innerText = "GAME REVIEW";
-  document.getElementById('idea-text').innerText = "Click a move and press 'Ask Coach' for insights.";
-  
-  currentFen = game.fen();
-  renderMoves(true);
-  game.reset(); 
-  update();
-}
-
-function runGameReview() {
-  const pgn = game.pgn();
-  const temp = new Chess(); temp.loadPgn(pgn); 
-  const history = temp.history({ verbose: true });
-  
-  analysisQueue = [];
-  analysisResults = [];
-  isAnalysisRunning = true;
-  
-  let g = new Chess();
-  analysisQueue.push({ fen: g.fen(), move: 'Start' });
-  
-  history.forEach(m => {
-    g.move(m);
-    analysisQueue.push({ fen: g.fen(), move: m.san });
-  });
-  
-  processQueue();
-}
-
-function processQueue() {
-  if(analysisQueue.length === 0) {
-    isAnalysisRunning = false;
-    document.getElementById('btn-action').innerText = "Review Complete";
-    renderMoves(true); 
-    return;
-  }
-  const task = analysisQueue[0];
-  const pct = Math.round((analysisResults.length / (analysisResults.length + analysisQueue.length)) * 100);
-  document.getElementById('btn-action').innerText = `Analyzing... ${pct}%`;
-  stockfish.postMessage(`position fen ${task.fen}`);
-  stockfish.postMessage("go depth 12"); 
-}
-
-function onUserMove(orig, dest) {
-  const move = game.move({ from: orig, to: dest, promotion: 'q' });
-  if(!move) { cg.set({fen:game.fen()}); return; }
-  update();
-  if (mode !== 'analysis' && !game.isGameOver()) {
-    setTimeout(() => {
-      let skill = 20; let depth = 12;
-      if(mode === 'bot') { skill = Math.floor((botElo - 400) / 120); depth = 6; }
-      stockfish.postMessage(`setoption name Skill Level value ${skill}`);
-      stockfish.postMessage(`position fen ${game.fen()}`);
-      stockfish.postMessage(`go depth ${depth}`);
-    }, 400);
-  }
-}
-
-function onEngineMsg(e) {
-  const line = e.data;
-  if (line.startsWith('info') && line.includes('score')) {
-    const sc = line.match(/score cp (-?\d+)/);
-    const mat = line.match(/score mate (-?\d+)/);
-    let val = 0;
-    if(mat) val = mat[1] > 0 ? 1000 : -1000;
-    else if(sc) val = parseInt(sc[1]);
-    
-    if (isAnalysisRunning && analysisQueue.length > 0) {
-        analysisQueue[0].eval = val; 
-    } else {
-        if(game.turn() === 'b') val = -val;
-        const p = Math.max(0, Math.min(100, 50 + (val/10)));
-        document.getElementById('eval-fill').style.height = p + '%';
-        document.getElementById('eval-bot').innerText = (val/100).toFixed(1);
-    }
-  }
-  if (line.startsWith('bestmove')) {
-    const moveStr = line.split(' ')[1];
-    if (isAnalysisRunning) {
-        const task = analysisQueue.shift();
-        task.bestMove = moveStr;
-        analysisResults.push(task);
-        processQueue();
-    }
-    else if (mode !== 'analysis' && game.turn() === 'b') {
-        game.move({ from: moveStr.slice(0,2), to: moveStr.slice(2,4), promotion:'q' });
-        update();
-    }
-  }
-}
-
-function update() {
-  cg.set({
-    fen: game.fen(),
-    turnColor: game.turn() === 'w' ? 'white' : 'black',
-    movable: { color: game.turn() === 'w' ? 'white' : 'black', dests: getDests() },
-    check: game.inCheck()
-  });
-  if(mode !== 'analysis') renderMoves(false);
-}
-
-function renderMoves(hasAnalysis) {
-  const list = document.getElementById('moves-list');
-  list.innerHTML = "";
-  const history = game.history({ verbose: true });
-  const dataSrc = hasAnalysis && analysisResults.length > 0 ? analysisResults.slice(1) : history;
-
-  dataSrc.forEach((m, i) => {
-      const div = document.createElement('div');
-      div.className = "move-row";
-      let evalTxt = "", mark = "", markClass = "";
-      if (hasAnalysis && m.eval !== undefined) {
-         const cp = m.eval; 
-         evalTxt = (cp / 100).toFixed(1);
-         if (Math.abs(cp) > 300) { mark = "!!"; markClass="cl-brilliant"; }
-      }
-      div.innerHTML = `<span style="color:#666">${Math.floor(i/2)+1}.</span><span style="font-weight:bold; color:#eee;">${m.san || m.move}</span><span class="eval-val">${evalTxt}</span><span class="classification ${markClass}">${mark}</span>`;
-      div.onclick = () => {
-         let g = new Chess();
-         for(let k=0; k<=i; k++) g.move(history[k]);
-         game.load(g.fen());
-         
-         // STORE CONTEXT FOR GEMINI
-         lastMoveSelected = { fen: g.fen(), san: m.san || m.move, eval: m.eval || 0 };
-         
-         update();
-      };
-      list.appendChild(div);
-  });
-  list.scrollTop = list.scrollHeight;
-}
-
-function handleActionBtn() {
-    if(mode === 'scenario') loadScenario();
-    if(mode === 'bot') toggleBotMode(); 
-    if(mode === 'analysis') runGameReview();
-}
-
-function highlightTab(cat) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    // In prod add IDs
-}
-
-function getDests() {
-  const dests = new Map();
-  game.moves({verbose:true}).forEach(m => {
-    if(!dests.has(m.from)) dests.set(m.from, []);
-    dests.get(m.from).push(m.to);
-  });
-  return dests;
-}
 init();
 </script>
 </body>
