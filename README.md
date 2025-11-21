@@ -16,4 +16,7 @@ This project is built using standard web technologies and deployed with Vercel.
 Frontend:
 HTML
 JavaScript
-CSS/Styling
+CSS
+
+Backend:
+Node JS
